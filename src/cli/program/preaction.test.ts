@@ -233,6 +233,17 @@ describe("registerPreActionHooks", () => {
     processTitleSetSpy.mockRestore();
   });
 
+  it("does not announce an update before activation begins", async () => {
+    observedProcessTitle = "openclaw-cli@0123456789abcdef";
+
+    await runPreAction({
+      parseArgv: ["update", "status"],
+      processArgv: ["node", "openclaw", "update", "status"],
+    });
+
+    expect(observedProcessTitle).toBe("openclaw-cli@0123456789abcdef");
+  });
+
   it.each([
     ["approvals", "pending"],
     ["skills"],
