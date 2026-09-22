@@ -685,6 +685,7 @@ describe("session groups catalog", () => {
     const storePath = await seedSessionStore({
       [sessionKey]: { sessionId: "changed-group", updatedAt: Date.now(), category: "Old" },
     });
+    let changed = false;
     await expect(
       renameSessionGroup({
         cfg,
@@ -692,6 +693,11 @@ describe("session groups catalog", () => {
         to: "New",
         env,
         assertTargetCurrent: () => {
+          if (changed) {
+            return;
+          }
+          // Later authority checks may run while the worker owns lifecycle custody.
+          changed = true;
           stateDatabase.runOpenClawStateWriteTransaction(
             ({ db }) => {
               db.prepare("UPDATE session_groups SET cwd = ?, worktree = ? WHERE name = ?").run(
