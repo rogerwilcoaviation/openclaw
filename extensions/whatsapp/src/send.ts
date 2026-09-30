@@ -263,6 +263,15 @@ async function sendMessageWhatsAppInActivityScope(
       await options.onPlatformSendDispatch?.();
       const replyToId = nextReplyToId();
       const partOptions = replyToId ? quotedSendOptions : sendOptions;
+      // Preparation and the dispatch fence can await account teardown or replacement.
+      // Revalidate the captured listener's live account lease immediately before I/O.
+      const current = requireOutboundActiveWebListener({ cfg, accountId: resolvedAccountId });
+      if (current.listener !== active) {
+        const cause = new Error(
+          `WhatsApp listener changed before dispatch (account: ${resolvedAccountId}). Retry with the active connection.`,
+        );
+        throw new PlatformMessageNotDispatchedError(cause.message, { cause });
+      }
       const accepted = requireWhatsAppAcceptedSendResult(
         partOptions
           ? await active.sendMessage(to, part, buffer, mime, partOptions)

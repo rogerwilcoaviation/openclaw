@@ -107,8 +107,9 @@ describe("WhatsApp delivery recovery", () => {
       sendMessage.mockImplementation(async () =>
         createAcceptedWhatsAppSendResult("text", `part-${sendMessage.mock.calls.length}`),
       );
+      const listener = { sendMessage, sendComposingTo: vi.fn() };
       runtimeContextMocks.controllers.set(accountId, {
-        getActiveListener: () => ({ sendMessage, sendComposingTo: vi.fn() }),
+        getActiveListener: () => listener,
       });
       const onDeliveryResult = vi.fn();
       const result = await sendDurableMessageBatch({
@@ -160,8 +161,9 @@ describe("WhatsApp delivery recovery", () => {
     sendMessage.mockImplementation(async () =>
       createAcceptedWhatsAppSendResult("text", `payload-${sendMessage.mock.calls.length}`),
     );
+    const listener = { sendMessage, sendComposingTo: vi.fn() };
     runtimeContextMocks.controllers.set(accountId, {
-      getActiveListener: () => ({ sendMessage, sendComposingTo: vi.fn() }),
+      getActiveListener: () => listener,
     });
     const onPlatformSendDispatch = vi.fn(async () => {});
     const onDeliveryResult = vi.fn();
@@ -427,8 +429,9 @@ describe("WhatsApp delivery recovery", () => {
           }
           return createAcceptedWhatsAppSendResult("text", "accepted-first");
         });
+        const listener = { sendMessage, sendComposingTo: vi.fn() };
         runtimeContextMocks.controllers.set(accountId, {
-          getActiveListener: () => ({ sendMessage, sendComposingTo: vi.fn() }),
+          getActiveListener: () => listener,
         });
         const result = await sendDurableMessageBatch({
           cfg: { channels: { whatsapp: { textChunkLimit: 160 } } },
